@@ -22,6 +22,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"C:/Users/masocampus/Desktop/react-component-generator/.claude/hooks/check-test.sh\""
+          }
+        ]
+      }
     ]
   }
 }
