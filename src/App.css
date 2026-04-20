@@ -738,3 +738,29 @@
     max-width: 100%;
   }
 }
+
+/* Prompt Counter */
+.prompt-counter {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.char-count {
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0.25rem 0.75rem;
+  border-radius: 3px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.char-count.valid {
+  color: #27ae60;
+  background-color: rgba(39, 174, 96, 0.1);
+}
+
+.char-count.invalid {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
