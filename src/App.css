@@ -764,3 +764,15 @@
   color: #e74c3c;
   background-color: rgba(231, 76, 60, 0.1);
 }
+
+/* Streaming cursor */
+.cursor-blink {
+  animation: blink 0.7s step-end infinite;
+  color: inherit;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
