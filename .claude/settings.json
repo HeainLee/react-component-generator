@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Bash|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"C:/Users/masocampus/Desktop/react-component-generator/.claude/hooks/deny-env.sh\"",
+            "statusMessage": "민감정보 접근 차단 검사 중..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"C:/Users/masocampus/Desktop/react-component-generator/.claude/hooks/run-tests.sh\"",
+            "statusMessage": "커밋 전 테스트 실행 중...",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
