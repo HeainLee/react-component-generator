@@ -37,4 +37,9 @@ describe('LivePreview - 뷰포트 너비', () => {
     render(<LivePreview code="render(<div/>);" />);
     expect(screen.getByTestId('live-preview')).toBeInTheDocument();
   });
+
+  it('isStreaming이 true이면 "생성 중..." 메시지를 표시한다', () => {
+    const { container } = render(<LivePreview code="render(<div/>);" isStreaming={true} />);
+    expect(container.textContent).toContain('생성 중...');
+  });
 });

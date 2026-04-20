@@ -12,6 +12,7 @@ export default defineConfig({
       },
     },
   },
+  // @ts-expect-error vitest config is valid but not in vite types
   test: {
     environment: 'jsdom',
     globals: true,

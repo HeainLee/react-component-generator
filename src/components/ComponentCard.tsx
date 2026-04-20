@@ -24,6 +24,12 @@ export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: 
   const [previewKey, setPreviewKey] = useState(0);
   const [viewport, setViewport] = useState<Viewport>('desktop');
 
+  // 스트리밍 중에는 코드 탭으로 표시
+  const displayTab = component.isStreaming ? 'code' : activeTab;
+  const displayCode = component.isStreaming
+    ? (component.streamingCode ?? '')
+    : component.code;
+
   return (
     <div className="component-card">
       <div className="card-header">
@@ -39,13 +45,14 @@ export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: 
           <button
             className="btn-regenerate"
             onClick={() => onRegenerate(component.prompt)}
-            disabled={isLoading}
+            disabled={isLoading || !!component.isStreaming}
           >
-            {isLoading ? '생성 중...' : '재생성'}
+            {isLoading || component.isStreaming ? '생성 중...' : '재생성'}
           </button>
           <button
             className="btn-remove"
             onClick={() => onRemove(component.id)}
+            disabled={!!component.isStreaming}
           >
             삭제
           </button>
@@ -54,19 +61,21 @@ export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: 
       <div className="card-tabs">
         <div className="tabs-left">
           <button
-            className={`tab ${activeTab === 'preview' ? 'tab--active' : ''}`}
+            className={`tab ${displayTab === 'preview' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('preview')}
+            disabled={component.isStreaming}
           >
             미리보기
           </button>
           <button
-            className={`tab ${activeTab === 'code' ? 'tab--active' : ''}`}
+            className={`tab ${displayTab === 'code' ? 'tab--active' : ''}`}
             onClick={() => setActiveTab('code')}
+            disabled={component.isStreaming}
           >
             코드
           </button>
         </div>
-        {activeTab === 'preview' && (
+        {displayTab === 'preview' && (
           <div className="viewport-buttons">
             {VIEWPORTS.map((vp) => (
               <button
@@ -82,14 +91,15 @@ export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: 
         )}
       </div>
       <div className="card-content">
-        {activeTab === 'preview' ? (
+        {displayTab === 'preview' ? (
           <LivePreview
             key={previewKey}
             code={component.code}
             viewportWidth={VIEWPORTS.find((v) => v.id === viewport)!.width}
+            isStreaming={component.isStreaming}
           />
         ) : (
-          <CodeView code={component.code} />
+          <CodeView code={displayCode} isStreaming={component.isStreaming} />
         )}
       </div>
     </div>
