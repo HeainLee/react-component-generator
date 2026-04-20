@@ -51,20 +51,50 @@ export function useComponentGenerator(): UseComponentGeneratorReturn {
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let lineBuffer = '';
+
+      const processLine = (line: string) => {
+        if (!line.startsWith('data: ')) return false;
+
+        const raw = line.slice(6).trim();
+        if (!raw) return false;
+
+        if (raw === '[DONE]') return true; // signal completion
+
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.error) {
+            throw new Error(parsed.error);
+          }
+          accumulated += parsed.chunk ?? '';
+          setComponents((prev) =>
+            prev.map((c) =>
+              c.id === streamingId ? { ...c, streamingCode: accumulated } : c
+            )
+          );
+        } catch (parseErr) {
+          if (!(parseErr instanceof SyntaxError)) {
+            throw parseErr;
+          }
+          // Ignore JSON parse errors
+        }
+        return false;
+      };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        lineBuffer += chunk;
+        const lines = lineBuffer.split('\n');
+
+        // 마지막 라인은 불완전할 수 있으므로 버퍼에 보관
+        lineBuffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-
-          const raw = line.slice(6);
-
-          if (raw === '[DONE]') {
+          if (processLine(line)) {
+            // [DONE] 수신
             const finalCode = ensureRenderCall(stripCodeFences(accumulated));
             setComponents((prev) =>
               prev.map((c) =>
@@ -76,23 +106,21 @@ export function useComponentGenerator(): UseComponentGeneratorReturn {
             setIsLoading(false);
             return;
           }
+        }
+      }
 
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed.error) {
-              throw new Error(parsed.error);
-            }
-            accumulated += parsed.chunk ?? '';
-            setComponents((prev) =>
-              prev.map((c) =>
-                c.id === streamingId ? { ...c, streamingCode: accumulated } : c
-              )
-            );
-          } catch (parseErr) {
-            if (!(parseErr instanceof SyntaxError)) {
-              throw parseErr;
-            }
-          }
+      // 스트림 끝난 후 버퍼에 남은 라인 처리
+      if (lineBuffer.trim()) {
+        if (processLine(lineBuffer)) {
+          // [DONE] 수신
+          const finalCode = ensureRenderCall(stripCodeFences(accumulated));
+          setComponents((prev) =>
+            prev.map((c) =>
+              c.id === streamingId
+                ? { ...c, code: finalCode, isStreaming: false, streamingCode: undefined }
+                : c
+            )
+          );
         }
       }
     } catch (err) {
