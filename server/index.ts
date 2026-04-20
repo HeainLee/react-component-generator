@@ -372,45 +372,17 @@ const server = Bun.serve({
         const resolvedKey = resolveApiKey(provider, apiKey);
 
         if (!resolvedKey) {
-          const errorStream = new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(
-                new TextEncoder().encode(
-                  `data: ${JSON.stringify({ error: `API key is required. Set ${provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY'} in .env or enter it manually.` })}\n\n`
-                )
-              );
-              controller.close();
-            },
-          });
-          return new Response(errorStream, {
-            status: 400,
-            headers: {
-              ...CORS_HEADERS,
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-            },
-          });
+          return Response.json(
+            { error: `API key is required. Set ${provider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY'} in .env or enter it manually.` },
+            { status: 400, headers: CORS_HEADERS }
+          );
         }
 
         if (!prompt) {
-          const errorStream = new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(
-                new TextEncoder().encode(
-                  `data: ${JSON.stringify({ error: 'Prompt is required' })}\n\n`
-                )
-              );
-              controller.close();
-            },
-          });
-          return new Response(errorStream, {
-            status: 400,
-            headers: {
-              ...CORS_HEADERS,
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-            },
-          });
+          return Response.json(
+            { error: 'Prompt is required' },
+            { status: 400, headers: CORS_HEADERS }
+          );
         }
 
         const stream =
@@ -427,32 +399,21 @@ const server = Bun.serve({
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
+        let errorMsg = message;
+        let status = 500;
 
-        const errorStream = new ReadableStream<Uint8Array>({
-          start(controller) {
-            let errorMsg = message;
-            if (message.includes('503')) {
-              errorMsg = 'API 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.';
-            } else if (message.includes('429')) {
-              errorMsg = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            }
-            controller.enqueue(
-              new TextEncoder().encode(
-                `data: ${JSON.stringify({ error: errorMsg })}\n\n`
-              )
-            );
-            controller.close();
-          },
-        });
+        if (message.includes('503')) {
+          errorMsg = 'API 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.';
+          status = 503;
+        } else if (message.includes('429')) {
+          errorMsg = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+          status = 429;
+        }
 
-        return new Response(errorStream, {
-          status: message.includes('503') ? 503 : message.includes('429') ? 429 : 500,
-          headers: {
-            ...CORS_HEADERS,
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-          },
-        });
+        return Response.json(
+          { error: errorMsg },
+          { status, headers: CORS_HEADERS }
+        );
       }
     }
 
