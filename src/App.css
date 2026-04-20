@@ -531,8 +531,47 @@
 /* Tabs */
 .card-tabs {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   border-bottom: 2px solid #2c3e50;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+}
+
+.tabs-left {
+  display: flex;
+}
+
+.viewport-buttons {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.btn-viewport {
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 3px;
+  color: #6b6354;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  transition: all 0.1s ease;
+}
+
+.btn-viewport:hover {
+  border-color: #2c3e50;
+  color: #2c3e50;
+  background: rgba(44, 62, 80, 0.05);
+}
+
+.btn-viewport--active {
+  border-color: #d97f54;
+  color: #d97f54;
+  background: rgba(217, 127, 84, 0.08);
+  font-weight: 700;
 }
 
 .tab {
@@ -593,6 +632,12 @@
 /* Preview */
 .preview-content {
   padding: 2rem;
+}
+
+.preview-viewport-wrapper {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
 }
 
 .preview-render {

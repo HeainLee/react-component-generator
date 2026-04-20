@@ -2,18 +2,21 @@ import { LiveProvider, LivePreview as ReactLivePreview, LiveError } from 'react-
 
 interface LivePreviewProps {
   code: string;
+  viewportWidth?: string;
 }
 
-export function LivePreview({ code }: LivePreviewProps) {
+export function LivePreview({ code, viewportWidth = '100%' }: LivePreviewProps) {
   return (
     <div className="preview-panel">
-      <div className="panel-header">
-        <h3>미리보기</h3>
-      </div>
       <div className="preview-content">
         <LiveProvider code={code} noInline>
-          <div className="preview-render">
-            <ReactLivePreview />
+          <div className="preview-viewport-wrapper">
+            <div
+              className="preview-render"
+              style={{ width: viewportWidth, maxWidth: '100%', transition: 'width 0.2s ease' }}
+            >
+              <ReactLivePreview />
+            </div>
           </div>
           <LiveError className="preview-error" />
         </LiveProvider>

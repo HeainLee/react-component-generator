@@ -11,10 +11,18 @@ interface ComponentCardProps {
 }
 
 type Tab = 'preview' | 'code';
+type Viewport = 'mobile' | 'tablet' | 'desktop';
+
+const VIEWPORTS: { id: Viewport; label: string; icon: string; width: string }[] = [
+  { id: 'mobile', label: '모바일', icon: '📱', width: '375px' },
+  { id: 'tablet', label: '태블릿', icon: '📟', width: '768px' },
+  { id: 'desktop', label: '데스크탑', icon: '🖥', width: '100%' },
+];
 
 export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: ComponentCardProps) {
   const [activeTab, setActiveTab] = useState<Tab>('preview');
   const [previewKey, setPreviewKey] = useState(0);
+  const [viewport, setViewport] = useState<Viewport>('desktop');
 
   return (
     <div className="component-card">
@@ -44,22 +52,42 @@ export function ComponentCard({ component, onRemove, onRegenerate, isLoading }: 
         </div>
       </div>
       <div className="card-tabs">
-        <button
-          className={`tab ${activeTab === 'preview' ? 'tab--active' : ''}`}
-          onClick={() => setActiveTab('preview')}
-        >
-          미리보기
-        </button>
-        <button
-          className={`tab ${activeTab === 'code' ? 'tab--active' : ''}`}
-          onClick={() => setActiveTab('code')}
-        >
-          코드
-        </button>
+        <div className="tabs-left">
+          <button
+            className={`tab ${activeTab === 'preview' ? 'tab--active' : ''}`}
+            onClick={() => setActiveTab('preview')}
+          >
+            미리보기
+          </button>
+          <button
+            className={`tab ${activeTab === 'code' ? 'tab--active' : ''}`}
+            onClick={() => setActiveTab('code')}
+          >
+            코드
+          </button>
+        </div>
+        {activeTab === 'preview' && (
+          <div className="viewport-buttons">
+            {VIEWPORTS.map((vp) => (
+              <button
+                key={vp.id}
+                className={`btn-viewport ${viewport === vp.id ? 'btn-viewport--active' : ''}`}
+                onClick={() => setViewport(vp.id)}
+                title={`${vp.label} (${vp.width})`}
+              >
+                {vp.icon} {vp.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="card-content">
         {activeTab === 'preview' ? (
-          <LivePreview key={previewKey} code={component.code} />
+          <LivePreview
+            key={previewKey}
+            code={component.code}
+            viewportWidth={VIEWPORTS.find((v) => v.id === viewport)!.width}
+          />
         ) : (
           <CodeView code={component.code} />
         )}
