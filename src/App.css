@@ -738,3 +738,15 @@
     max-width: 100%;
   }
 }
+
+/* Streaming cursor */
+.cursor-blink {
+  animation: blink 0.7s step-end infinite;
+  color: inherit;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
